@@ -2,7 +2,7 @@
 
 This repository was created to archive and document all of my attempts to learn and develop malware. I'm brand new to all of this; I will document my learning in the form of comments and the README files in each folder. We'll start from the absolute beginning and see how far we can get. The techniques I'd love to learn are:
 
-- Shellcode Injection `✅`
+- [Shellcode Injection](1-process%20injection) `✅`
 - DLL Injection
 - DLL Proxying
 - Reflective DLL Injection
