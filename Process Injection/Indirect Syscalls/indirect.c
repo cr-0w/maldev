@@ -1,3 +1,9 @@
+/*------------------------------------------------------------------------------------------------------
+@author     crow
+@brief	    use indirect syscalls to perform shellcode injection
+@site       https://www.crow.rip/crows-nest/mal/dev/inject/syscalls/indirect-syscalls
+------------------------------------------------------------------------------------------------------*/
+
 #include "glassBox.h"
 
 DWORD NtCloseSSN;
@@ -73,7 +79,7 @@ VOID IndirectPrelude(
 
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char* argv[]) {
     
     DWORD    PID      = 0;
     HMODULE  hNTDLL   = NULL;
@@ -148,7 +154,6 @@ int main(int argc, char** argv) {
     }
     okay("thread created!");
 
-    /*--------[CLEANUP & EXIT]--------*/
     info("waiting for thread to finish execution");
     STATUS = NtWaitForSingleObject(hThread, FALSE, NULL);
     if (!STATUS == STATUS_SUCCESS) {
