@@ -13,7 +13,7 @@ This repository was created to archive and document all of my attempts to learn 
 - `🟢` [Using NTDLL](https://www.crow.rip/crows-nest/mal/dev/inject/ntapi-injection) 
 - `🟢` [Full NTDLL Implementation](https://www.crow.rip/crows-nest/mal/dev/inject/ntapi-injection/complete-ntapi-implementation)
 - `🟢` [Using Direct System Calls](https://www.crow.rip/crows-nest/mal/dev/inject/syscalls/direct-syscalls) 
-- `🟡` Indirect Syscalls 
+- `🟢` [Indirect Syscalls](https://www.crow.rip/crows-nest/mal/dev/inject/syscalls/indirect-syscalls)
 - ...
 
 > **Note**:
