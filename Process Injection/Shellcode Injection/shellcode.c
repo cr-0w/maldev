@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
 	
 	info("creating thread to run shellcode...");
 	hThread = CreateRemoteThreadEx(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)rBuffer, NULL, 0, 0, 0);
-	if (rBuffer == NULL) {
+	if (hThread == NULL) {
 		warn("[CreateRemoteThread] failed, error: 0x%lx", GetLastError());
 		goto CLEANUP;
 	}
