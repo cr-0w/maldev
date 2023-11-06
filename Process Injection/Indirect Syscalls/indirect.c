@@ -1,7 +1,8 @@
 /*------------------------------------------------------------------------------------------------------
-@author     crow
-@brief	    use indirect syscalls to perform shellcode injection
-@site       https://www.crow.rip/crows-nest/mal/dev/inject/syscalls/indirect-syscalls
+@author       crow
+@brief	      use indirect syscalls to perform shellcode injection
+@site         https://www.crow.rip/crows-nest/mal/dev/inject/syscalls/indirect-syscalls
+@inspiration  @VirtualAllocEx (RedOps)
 ------------------------------------------------------------------------------------------------------*/
 
 #include "glassBox.h"
