@@ -2,6 +2,7 @@
 @author     crow
 @brief      use system calls directly to perform shellcode injection
 @site       https://www.crow.rip/crows-nest/mal/dev/inject/syscalls/direct-syscalls
+@inspiration  @VirtualAllocEx (RedOps)
 ------------------------------------------------------------------------------------------------------*/
 
 #include "glassBox.h"
