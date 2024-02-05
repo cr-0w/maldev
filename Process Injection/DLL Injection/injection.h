@@ -11,6 +11,7 @@
 
 //-------------------------------------------------------------------------------------------
 
+#pragma region FUNCTIONS 
 /*
  * @brief prints out a functions error code with the functions name for easier debugging.
  * @param function_name name of the function.
@@ -34,6 +35,7 @@ BOOL DLLInjection(
         _In_ LPCWSTR DLLPath,
         _In_ SIZE_T DLLSize 
         );
+#pragma endregion
 
 //-------------------------------------------------------------------------------------------
 

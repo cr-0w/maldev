@@ -1,5 +1,4 @@
 .data 
-
 ;---------------------------------------------------------------
 ; DIRECT SYSCALLS
 extern g_NtOpenProcessSSN:DWORD

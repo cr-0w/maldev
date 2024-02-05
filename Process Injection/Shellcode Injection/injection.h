@@ -12,6 +12,7 @@
 
 //-------------------------------------------------------------------------------------------
 
+#pragma region FUNCTIONS 
 /*
  * @brief Formats an error.
  * @param FunctionName the name of the function that's failed.
@@ -35,6 +36,7 @@ BOOL ShellcodeInjection(
         _In_ CONST PBYTE Payload,
         _In_ SIZE_T PayloadSize
         );
+#pragma endregion
 
 //-------------------------------------------------------------------------------------------
 
