@@ -33,15 +33,15 @@ DWORD GetSyscallNumber(
         return 0;
     }
 
-	/*						                     .----------------------------.
+	/*						 .----------------------------.
 		NtFunction+0x0:    4C 8B D1              |      mov r10, rcx          |
 		NtFunction+0x3:    B8 ?? 00 00 00 >------'      mov eax, [??] <-------'
 		[...]              [...]                        [...]     |
 		NtFunction+0x12:   0F 05                        syscall   |                      
 		NtFunction+0x14:   C3                           ret       |
 		                              .---------------------------'
-									  |
-									  '---------------> SSN
+					      |
+					      '---------------> SSN
 	*/
 
     SyscallNumber = ((PBYTE)(NtFunctionAddress + 0x4))[0]; 
