@@ -1,9 +1,10 @@
 /*
----------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
 @culprit: crow
 @website: https://www.crow.rip/crows-nest/mal/dev/inject/dll-injection 
+@credits: https://www.crow.rip/crows-nest/mal/dev/inject/dll-injection#references 
 @youtube: https://youtu.be/A6EKDAKBXPs
----------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
 */
 
 #include "injection.h"

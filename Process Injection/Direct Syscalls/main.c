@@ -1,9 +1,10 @@
 /*
----------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 @culprit: crow
 @website: https://www.crow.rip/crows-nest/mal/dev/inject/syscalls/direct-syscalls 
+@credits: https://www.crow.rip/crows-nest/mal/dev/inject/syscalls/direct-syscalls#references
 @youtube: https://youtu.be/-M2_mZg_2Ew 
----------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 */
 
 #include "injection.h"

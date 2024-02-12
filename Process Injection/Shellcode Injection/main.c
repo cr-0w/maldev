@@ -2,6 +2,7 @@
 ---------------------------------------------------------------------------------------
 @culprit: crow
 @website: https://www.crow.rip/crows-nest/mal/dev/inject/shellcode-injection
+@credits: https://www.crow.rip/crows-nest/mal/dev/inject/shellcode-injection#references
 @youtube: https://youtu.be/A6EKDAKBXPs
 ---------------------------------------------------------------------------------------
 */

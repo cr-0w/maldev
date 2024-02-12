@@ -1,9 +1,10 @@
 /*
----------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 @culprit: crow
 @website: https://www.crow.rip/crows-nest/mal/dev/inject/ntapi-injection/ntapi-injection
+@credits: https://www.crow.rip/crows-nest/mal/dev/inject/ntapi-injection/ntapi-injection#references
 @youtube: https://youtu.be/P1PHRcmPM7c
----------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 */
 
 #include "injection.h"
