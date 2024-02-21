@@ -40,7 +40,7 @@ BOOL DLLInjection(
     INFO("supplied DLL: \"%S\"", DLLPath);
     INFO("trying to get a handle on the process (%ld)...", ProcessId);
     ProcessHandle = OpenProcess(
-            (PROCESS_VM_OPERATION | PROCESS_VM_OPERATION), 
+            (PROCESS_VM_OPERATION | PROCESS_VM_WRITE), 
             FALSE, 
             ProcessId
             );
