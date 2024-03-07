@@ -11,7 +11,6 @@
 
 int main(int argc, char* argv[]) {
 
-    WCHAR DLL[MAX_PATH] = L"C:\\Users\\hepha\\Documents\\Programs\\crow.dll";
     SIZE_T DLLPathSize = sizeof(DLL);
 
     if (argc < 2) {
@@ -23,7 +22,7 @@ int main(int argc, char* argv[]) {
                 atoi(argv[1]), 
                 DLL, 
                 DLLPathSize
-                )) {
+    )) {
         WARN("DLL injection failed, exiting...");
         return EXIT_FAILURE;
     }

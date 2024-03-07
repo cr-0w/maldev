@@ -1,130 +1,125 @@
 #include "injection.h"
 
-//---------------------------------------------------------------------------------
-
 VOID PrettyFormat(
         _In_ LPCSTR FunctionName,
-        _In_ CONST DWORD ErrorStatus
-        ) {
+        _In_ CONST DWORD Error
+) {
 
-    if (NULL == FunctionName || 0 == ErrorStatus) {
+    if (NULL == FunctionName || 0 == Error) {
         WARN("either you didn't supply a function name"
-                "or the function actually returned successfully");
+             "or the function actually returned successfully");
     }
 
-    WARN("[%s] failed, error: 0x%lx", FunctionName, ErrorStatus);
+    WARN("[%s] failed, error: 0x%lx", FunctionName, Error);
     return;
 
 }
 
-//---------------------------------------------------------------------------------
-
 BOOL DLLInjection(
-        _In_ DWORD ProcessId,
+        _In_ CONST DWORD PID,
         _In_ LPCWSTR DLLPath,
-        _In_ SIZE_T DLLPathSize 
-        ) { 
+        _In_ CONST SIZE_T PathSize
+) { 
 
-    BOOL    STATE          = TRUE;
-    PVOID   RemoteBuffer   = NULL;
-    HANDLE  ThreadHandle   = NULL;
-    HANDLE  ProcessHandle  = NULL;
-    HMODULE Kernel32Handle = NULL;
-    SIZE_T  BytesWritten   = 0;
+    BOOL    STATE         = TRUE;
+    PVOID   rBuffer       = NULL;
+    PVOID   p_LoadLibrary = NULL;
+    HANDLE  hThread       = NULL;
+    HANDLE  hProcess      = NULL;
+    HMODULE hKernel32     = NULL;
+    DWORD   TID           = 0;
+    SIZE_T  BytesWritten  = 0;
 
-    if (NULL == DLLPath || 0 == DLLPathSize) {
-        WARN("DLL path's not set. exiting...");
+    if (NULL == DLLPath || 0 == PathSize) {
+        WARN("target DLL not set. exiting...");
         return FALSE;
     }
 
-    INFO("supplied DLL: \"%S\"", DLLPath);
-    INFO("trying to get a handle on the process (%ld)...", ProcessId);
-    ProcessHandle = OpenProcess(
-            (PROCESS_VM_OPERATION | PROCESS_VM_WRITE), 
-            FALSE, 
-            ProcessId
-            );
-    if (NULL == ProcessHandle){
-        PrettyFormat("OpenProcess", GetLastError());
-        return FALSE;
+    INFO("trying to inject %S to the remote process...", DLL);
+    INFO("trying to get a handle on the process (%ld)...", PID);
+    hProcess = OpenProcess(
+            PROCESS_VM_OPERATION | PROCESS_VM_WRITE,
+            FALSE,
+            PID
+    );
+    if (NULL == hProcess) {
+        WARN("[OpenProcess] failed, error: 0x%lx", GetLastError());
+        return EXIT_FAILURE;
     }
-    OKAY("[0x%p] got a handle on the process!", ProcessHandle);
+    OKAY("[0x%p] got a handle on the process!", hProcess);
 
-    Kernel32Handle = GetModuleHandleW(L"Kernel32");
-    if (NULL == Kernel32Handle) {
-        PrettyFormat("GetModuleHandleW", GetLastError());
-        STATE = FALSE; goto CLEANUP;
+    INFO("getting a handle to Kernel32...");
+    hKernel32 = GetModuleHandleW(L"Kernel32.dll");
+    if (NULL == hKernel32) {
+        WARN("[GetModuleHandleW] failed, error: 0x%lx", GetLastError());
+        STATE = FALSE; goto CLEAN_UP;
     }
-    OKAY("[0x%p] got a handle on Kernel32.dll!", Kernel32Handle);
+    OKAY("[0x%p] got a handle to Kernel32!", hKernel32);
 
-    LPTHREAD_START_ROUTINE p_LoadLibraryW = (LPTHREAD_START_ROUTINE)GetProcAddress(
-            Kernel32Handle, "LoadLibraryW");
-    if (NULL == p_LoadLibraryW) {
-        WARN("failed to get the address of LoadLibraryW()");
-        STATE = FALSE; goto CLEANUP;
+    INFO("getting the address of LoadLibraryW...");
+    p_LoadLibrary = GetProcAddress(hKernel32, "LoadLibraryW");
+    if (NULL == p_LoadLibrary) {
+        WARN("[GetProcAddress] failed, error: 0x%lx", GetLastError());
+        STATE = FALSE; goto CLEAN_UP;
     }
-    OKAY("[0x%p] got the address of LoadLibraryW()!", p_LoadLibraryW);
+    OKAY("[0x%p] obtained the address of LoadLibraryW!", p_LoadLibrary);
 
-    RemoteBuffer = VirtualAllocEx(
-            ProcessHandle, 
-            NULL, 
-            DLLPathSize, 
-            (MEM_COMMIT | MEM_RESERVE), 
+    rBuffer = VirtualAllocEx(
+            hProcess,
+            NULL,
+            PathSize,
+            MEM_RESERVE | MEM_COMMIT,
             PAGE_READWRITE
-            );
-    if (NULL == RemoteBuffer) {
-        PrettyFormat("VirtualAllocEx", GetLastError());
-        STATE = FALSE; goto CLEANUP;
+    );
+    if (NULL == rBuffer) {
+        WARN("[VirtualAllocEx] failed, error: 0x%lx", GetLastError());
+        STATE = FALSE; goto CLEAN_UP;
     }
-    OKAY("[0x%p] [RW-] allocated a buffer with PAGE_READWRITE permissions.", RemoteBuffer);
+    OKAY("[0x%p] [RW-] allocated %zu-byte buffer to the target process", rBuffer, PathSize);
 
-    WriteProcessMemory(
-            ProcessHandle, 
-            RemoteBuffer,
-            DLLPath, 
-            DLLPathSize, 
-            &BytesWritten 
-            );
-    OKAY("[0x%p] [RW-] wrote %zu-bytes to allocated buffer!", RemoteBuffer, DLLPathSize);
+    if (!WriteProcessMemory(
+                hProcess,
+                rBuffer,
+                DLL,
+                PathSize,
+                &BytesWritten 
+    )){
+        WARN("[WriteProcessMemory] failed, error: 0x%lx", GetLastError());
+        STATE = FALSE; goto CLEAN_UP;
+    }
+    OKAY("[0x%p] [RW-] wrote %zu-bytes to the allocated buffer", rBuffer, BytesWritten);
 
-    ThreadHandle = CreateRemoteThread(
-            ProcessHandle,
+    hThread = CreateRemoteThread(
+            hProcess,
             NULL,
             0,
-            p_LoadLibraryW,
-            RemoteBuffer, /* argument for LoadLibrary() */
+            p_LoadLibrary,
+            rBuffer,
             0,
             0
-            );
-    if (NULL == ThreadHandle) {
-        PrettyFormat("CreateRemoteThread", GetLastError());
-        STATE = FALSE; goto CLEANUP;
+    );
+    if (NULL == hThread) {
+        WARN("[CreateRemoteThreadEx] failed, error: 0x%lx", GetLastError());
+        STATE = FALSE; goto CLEAN_UP;
     }
-    OKAY("[0x%p] got a handle on the thread! waiting for it to finish execution...", ThreadHandle);
+    OKAY("[0x%p] successfully created a thread (%ld)!", hThread, TID);
 
-    WaitForSingleObject(ThreadHandle, INFINITE);
-    INFO("[0x%p] thread finished execution! cleaning up...", ThreadHandle);
+    INFO("[0x%p] waiting for the thread to finish execution...", hThread);
+    WaitForSingleObject(hThread, INFINITE);
+    OKAY("[0x%p] thread finished execution, beginning cleanup...", hThread);
 
-CLEANUP:
+CLEAN_UP:
 
-    INFO("beginning cleanup...");
-    if (ThreadHandle) {
-        CloseHandle(ThreadHandle);
-        INFO("[0x%p] closed thread handle", ThreadHandle);
+    if (hThread) {
+        CloseHandle(hThread);
+        INFO("[0x%p] closed handle on thread", hThread);
     }
-
-    if (ProcessHandle) {
-        CloseHandle(ProcessHandle);
-        INFO("[0x%p] closed process handle", ProcessHandle);
+    if (hProcess) {
+        CloseHandle(hProcess);
+        INFO("[0x%p] closed handle on process", hProcess);
     }
-
-    if (RemoteBuffer) {
-        VirtualFree(RemoteBuffer, 0, MEM_RELEASE);
-        INFO("[0x%p] remote buffer freed", RemoteBuffer);
-    }
+    INFO("finished with cleanup, exiting...");
 
     return STATE;
 
 }
-
-//---------------------------------------------------------------------------------
