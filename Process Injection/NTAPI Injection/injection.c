@@ -123,7 +123,7 @@ BOOL NTAPIInjection(
             &rBuffer,
             0,
             &PayloadSize,
-            (MEM_COMMIT | MEM_RESERVE),
+            MEM_COMMIT | MEM_RESERVE,
             PAGE_EXECUTE_READWRITE
     );
     if (STATUS_SUCCESS != STATUS) {
