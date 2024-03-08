@@ -1,42 +1,49 @@
 #pragma once
 #include <windows.h>
 #include <stdio.h>
-#include <stdbool.h>
-
-//-------------------------------------------------------------------------------------------
 
 #define OKAY(MSG, ...) printf("[+] " MSG "\n", ##__VA_ARGS__)
 #define INFO(MSG, ...) printf("[i] " MSG "\n", ##__VA_ARGS__)
 #define WARN(MSG, ...) printf("[-] " MSG "\n", ##__VA_ARGS__)
-#define PROGRESS(MSG, ...) printf("\r[*] " MSG, ##__VA_ARGS__) /* solely for iterations */
+#define PROG(MSG, ...) printf("\r[*] " MSG,    ##__VA_ARGS__) /* solely for iterations */
 
-//-------------------------------------------------------------------------------------------
-
-#pragma region FUNCTIONS 
-/*
- * @brief Formats an error.
- * @param FunctionName the name of the function that's failed.
- * @param ErrorStatus the status returned by the function.
+/*!
+ * @brief 
+ *  Prints out a functions error code with the functions name for easier debugging.
+ *
+ * @param FunctionName 
+ *  Name of the function.
+ *
+ * @param Error 
+ *  The system error code returned by GetLastError();
+ *  GetLastError() just reads from the _TEB at the LastError member/offset (_TEB->LastError), 
+ *  so any function/routine that does this can be used in place of GetLastError().
+ *
  * @return Void.
  */
 VOID PrettyFormat(
         _In_ LPCSTR FunctionName,
-        _In_ CONST DWORD ErrorStatus
-        );
+        _In_ CONST DWORD Error
+);
 
-/*
- * @brief Injects a target process using classic shellcode injection with Win32 API.
- * @param ProcessId The PID of the target process.
- * @param Payload The shellcode you wish to inject.
- * @param PayloadSize The Size of the shellcode.
- * @return Bool. True if successful, false if not.
+/*!
+ * @brief 
+ *  Injects a target process using classic shellcode injection with Win32 API.
+ *
+ * @param PID 
+ *  The PID of the target process.
+ *
+ * @param Payload 
+ *  The shellcode you wish to inject.
+ *
+ * @param PayloadSize 
+ *  The Size of the shellcode.
+ *
+ * @return Bool 
+ *  True if successful, false if not.
  */
 BOOL ShellcodeInjection(
-        _In_ DWORD ProcessId,
+        _In_ CONST DWORD PID,
         _In_ CONST PBYTE Payload,
-        _In_ SIZE_T PayloadSize
-        );
-#pragma endregion
-
-//-------------------------------------------------------------------------------------------
-
+        _In_ CONST SIZE_T PayloadSize
+);

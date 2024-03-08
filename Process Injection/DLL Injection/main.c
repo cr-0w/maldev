@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
     SIZE_T DLLPathSize = sizeof(DLL);
 
     if (argc < 2) {
-        WARN("usage: \"%s\" PID", argv[0]);
+        WARN("usage: \"%s\" [PID]", argv[0]);
         return EXIT_FAILURE;
     }
 

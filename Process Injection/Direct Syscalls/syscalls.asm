@@ -1,4 +1,6 @@
 .data 
+;------------------------------------------------
+; DIRECT SYSCALLS
 extern g_NtOpenProcessSSN:DWORD
 extern g_NtAllocateVirtualMemorySSN:DWORD
 extern g_NtWriteVirtualMemorySSN:DWORD

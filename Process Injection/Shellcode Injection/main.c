@@ -18,7 +18,7 @@ __declspec(allocate(".text")) CONST UCHAR Payload[] = {
 int main(int argc, char* argv[]){
 
     if (argc < 2) {
-        WARN("usage: \"%s\" PID", argv[0]);
+        WARN("usage: \"%s\" [PID]", argv[0]);
         return EXIT_FAILURE;
     }
 
