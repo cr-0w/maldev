@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
                 atoi(argv[1]),
                 Shellcode,
                 sizeof(Shellcode)
-                )) {
+    )) {
         WARN("injection with direct syscalls failed, exiting...");
         return EXIT_FAILURE;
     }

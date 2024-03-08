@@ -7,7 +7,6 @@ extern g_NtWriteVirtualMemorySSN:DWORD
 extern g_NtCreateThreadExSSN:DWORD
 extern g_NtWaitForSingleObjectSSN:DWORD
 extern g_NtCloseSSN:DWORD
-
 ;---------------------------------------------------------------
 ; INDIRECT SYSCALLS
 ; You can just use one syscall instruction instead of 
