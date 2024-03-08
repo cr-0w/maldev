@@ -27,11 +27,11 @@ int main(int argc, char* argv[]){
                 Payload, 
                 sizeof(Payload)
     )) {
-        WARN("injection failed, exiting...");
+        WARN("shellcode injection failed, exiting...");
         return EXIT_FAILURE;
     }
 
-    OKAY("injection was successful! exiting...");
+    OKAY("shellcode injection was successful! exiting...");
     return EXIT_SUCCESS;
 
 }

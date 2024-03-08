@@ -27,11 +27,11 @@ int main(int argc, char* argv[]) {
                 Shellcode,
                 sizeof(Shellcode)
     )) {
-        WARN("injection with direct syscalls failed, exiting...");
+        WARN("injection with NTAPI failed, exiting...");
         return EXIT_FAILURE;
     }
 
-    OKAY("successfully injected process with direct syscalls!");
+    OKAY("successfully injected process with NTAPI!");
     return EXIT_SUCCESS;
 
 }
