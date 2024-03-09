@@ -2,7 +2,7 @@ CC := x86_64-w64-mingw32-gcc
 CFLAGS := -O2 -m64 -Wall -Wpedantic
 
 main: main.c
-	@echo [*] compiling the DLL injector...
+	@echo [*] compiling the shellcode injector...
 	$(CC) $(CFLAGS) -o shellcode_injector.exe main.c injection.c
 	@echo [+] finished! enjoy, nerd.
 
