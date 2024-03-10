@@ -96,14 +96,13 @@ BOOL DLLInjection(
             p_LoadLibrary,
             rBuffer,
             0,
-            0
+            &TID 
     );
     if (NULL == hThread) {
         WARN("[CreateRemoteThreadEx] failed, error: 0x%lx", GetLastError());
         STATE = FALSE; goto CLEAN_UP;
     }
     OKAY("[0x%p] successfully created a thread (%ld)!", hThread, TID);
-
     INFO("[0x%p] waiting for the thread to finish execution...", hThread);
     WaitForSingleObject(hThread, INFINITE);
     OKAY("[0x%p] thread finished execution, beginning cleanup...", hThread);
