@@ -11,8 +11,6 @@
 
 int main(int argc, char* argv[]) {
 
-    SIZE_T DLLPathSize = sizeof(DLL);
-
     if (argc < 2) {
         WARN("usage: \"%s\" [PID]", argv[0]);
         return EXIT_FAILURE;
@@ -21,7 +19,7 @@ int main(int argc, char* argv[]) {
     if (!DLLInjection(
                 atoi(argv[1]), 
                 DLL, 
-                DLLPathSize
+                sizeof(DLL) 
     )) {
         WARN("DLL injection failed, exiting...");
         return EXIT_FAILURE;
