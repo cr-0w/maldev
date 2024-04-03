@@ -8,7 +8,7 @@
 
 /*!
  * @brief
- *  Prints out a functions error code with the functions name for easier debugging.
+ *  Prints out a function's error code with the function's name for easier debugging.
  *  This function is just a wrapper for GetLastError().
  *
  * @param FunctionName
