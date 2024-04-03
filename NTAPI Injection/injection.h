@@ -147,7 +147,7 @@ VOID PrettyFormat(
  * @return
  *  The base address of the desired function.
  */
-UINT_PTR Getfn_NtFunctionAddress(
+UINT_PTR GetNtFunctionAddress(
     _In_ LPCSTR FunctionName,
     _In_ HMODULE ModuleHandle
 );
