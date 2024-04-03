@@ -9,7 +9,7 @@
 
 /*!
  * @brief
- *  Prints out a functions error code with the functions name for easier debugging.
+ *  Prints out a function's error code with the function's name for easier debugging.
  *  This function is just a wrapper for GetLastError().
  *
  * @param FunctionName
@@ -30,7 +30,7 @@ VOID PrettyFormat(_In_ LPCSTR FunctionName);
  *  Similar to the standard shellcode injection method, most of the steps
  *  we perform in this method are the same. The only difference is that
  *  we're injecting a library/module/DLL/whatever into a target process. Once a
- *  DLL is loaded in a process, its' DllMain() function is executed automagically.
+ *  DLL is loaded in a process, its DllMain() function is executed automagically.
  *
  *  To do this injection, we get a valid handle on the target process, allocate
  *  some memory into it, write the path to our DLL into that memory region. Then,
