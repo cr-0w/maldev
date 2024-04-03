@@ -1,8 +1,8 @@
 /*
 ----------------------------------------------------------------------------------
 @culprit: crow
-@website: https://www.crow.rip/crows-nest/mal/dev/inject/dll-injection 
-@credits: https://www.crow.rip/crows-nest/mal/dev/inject/dll-injection#references 
+@website: https://www.crow.rip/crows-nest/mal/dev/inject/dll-injection
+@credits: https://www.crow.rip/crows-nest/mal/dev/inject/dll-injection#references
 @youtube: https://youtu.be/A6EKDAKBXPs
 ----------------------------------------------------------------------------------
 */
@@ -16,11 +16,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    if (!DLLInjection(
-                atoi(argv[1]), 
-                DLL, 
-                sizeof(DLL) 
-    )) {
+    if (!DLLInjection(DLL, atoi(argv[1]), sizeof(DLL))) {
         WARN("DLL injection failed, exiting...");
         return EXIT_FAILURE;
     }
