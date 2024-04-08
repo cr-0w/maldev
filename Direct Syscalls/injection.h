@@ -3,9 +3,15 @@
 #include <windows.h>
 
 #define STATUS_SUCCESS (NTSTATUS)0x00000000L
-#define OKAY(MSG, ...) printf("[+] " MSG "\n", ##__VA_ARGS__)
-#define INFO(MSG, ...) printf("[*] " MSG "\n", ##__VA_ARGS__)
-#define WARN(MSG, ...) printf("[-] " MSG "\n", ##__VA_ARGS__)
+#define OKAY(MSG, ...) printf("[+] "               MSG "\n", ##__VA_ARGS__)
+#define INFO(MSG, ...) printf("[*] "               MSG "\n", ##__VA_ARGS__)
+#define WARN(MSG, ...) fprintf(stderr, "[-] "      MSG "\n", ##__VA_ARGS__)
+#define PRINT_ERROR(FUNCTION_NAME, NTSTATUS_ERROR)                        \
+    do {                                                                  \
+        fprintf(stderr,                                                   \
+                "[!] [" FUNCTION_NAME "] [%s:%d] failed, error: 0x%lx\n", \
+                __FILE__, __LINE__, NTSTATUS_ERROR);                      \
+    } while (0)
 
 DWORD g_NtOpenProcessSSN;
 DWORD g_NtAllocateVirtualMemorySSN;
@@ -176,23 +182,6 @@ VOID GetSyscallNumber(
     _In_  HMODULE NtdllHandle,
     _In_  LPCSTR NtFunctionName,
     _Out_ PDWORD NtFunctionSSN
-);
-
-/*!
- * @brief
- *  Prints out a functions error code with the functions name for easier debugging.
- *
- * @param FunctionName
- *  Name of the function.
- *
- * @param ErrorCode
- *  The NTSTATUS code returned by the failing NTAPI function.
- *
- * @return Void.
- */
-VOID PrettyFormat(
-    _In_ LPCSTR FunctionName,
-    _In_ CONST NTSTATUS ErrorCode
 );
 
 /*!
