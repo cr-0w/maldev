@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    if (!ShellcodeInjection(atoi(argv[1]), Payload, sizeof(Payload))) {
+    if (!ShellcodeInjection(atoi(argv[1]), Shellcode, sizeof(Shellcode))) {
         WARN("shellcode injection failed, exiting...");
         return EXIT_FAILURE;
     }

@@ -1,10 +1,5 @@
 #include "injection.h"
 
-VOID PrettyFormat(_In_ LPCSTR FunctionName) {
-    WARN("[%s] failed, error: 0x%lx", FunctionName, GetLastError());
-    return;
-}
-
 BOOL DLLInjection(
     _In_ LPCWSTR DllPath,
     _In_ CONST DWORD PID,
@@ -22,41 +17,41 @@ BOOL DLLInjection(
 
     ProcessHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, PID);
     if (NULL == ProcessHandle) {
-        PrettyFormat("OpenProcess");
-        return FALSE;
+        PRINT_ERROR("OpenProcess");
+        return FALSE; /* no point in continuing if we can't even get a handle on the process */
     }
     OKAY("[0x%p] got a handle on the process (%ld)!", ProcessHandle, PID);
 
     Kernel32Handle = GetModuleHandleW(L"Kernel32.dll");
     if (NULL == Kernel32Handle) {
-        PrettyFormat("GetModuleHandleW");
+        PRINT_ERROR("GetModuleHandleW");
         State = FALSE; goto CLEANUP;
     }
     OKAY("[0x%p] got a handle to Kernel32!", Kernel32Handle);
 
     p_LoadLibrary = GetProcAddress(Kernel32Handle, "LoadLibraryW");
     if (NULL == p_LoadLibrary) {
-        PrettyFormat("GetProcAddress");
+        PRINT_ERROR("GetProcAddress");
         State = FALSE; goto CLEANUP;
     }
     OKAY("[0x%p] obtained the address of LoadLibraryW!", p_LoadLibrary);
 
     Buffer = VirtualAllocEx(ProcessHandle, NULL, PathSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
     if (NULL == Buffer) {
-        PrettyFormat("VirtualAllocEx");
+        PRINT_ERROR("VirtualAllocEx");
         State = FALSE; goto CLEANUP;
     }
     OKAY("[0x%p] [RW-] allocated a buffer with PAGE_READWRITE [RW-] permissions!", Buffer);
 
     if (!WriteProcessMemory(ProcessHandle, Buffer, DllPath, PathSize, &BytesWritten)) {
-        PrettyFormat("WriteProcessMemory");
+        PRINT_ERROR("WriteProcessMemory");
         State = FALSE; goto CLEANUP;
     }
     OKAY("[0x%p] [RW-] wrote %zu-bytes to the allocated buffer", Buffer, BytesWritten);
 
     ThreadHandle = CreateRemoteThread(ProcessHandle, NULL, 0, (LPTHREAD_START_ROUTINE)p_LoadLibrary, Buffer, 0, &TID);
     if (NULL == ThreadHandle) {
-        PrettyFormat("CreateRemoteThread");
+        PRINT_ERROR("CreateRemoteThread");
         State = FALSE; goto CLEANUP;
     }
 
