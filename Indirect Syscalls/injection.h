@@ -205,26 +205,6 @@ VOID IndirectPrelude(
 
 /*!
  * @brief
-<<<<<<< HEAD
-=======
- *  Prints out a function's error code with the function's name for easier debugging.
- *
- * @param FunctionName
- *  Name of the function.
- *
- * @param ErrorCode
- *  The NTSTATUS code returned by the failing NTAPI function.
- *
- * @return Void.
- */
-VOID PrettyFormat(
-    _In_ LPCSTR FunctionName,
-    _In_ CONST NTSTATUS ErrorCode
-);
-
-/*!
- * @brief
->>>>>>> 748e7951bdfd1714958ed2277fcad63fabf13b1e
  *  Injects a target process with indirect syscalls.
  *
  * @param PID
