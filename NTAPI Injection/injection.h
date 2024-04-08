@@ -125,7 +125,7 @@ typedef NTSTATUS (NTAPI* fn_NtClose)(
 
 /*!
  * @brief
- *  Prints out a functions error code with the functions name for easier debugging.
+ *  Prints out a function's error code with the function's name for easier debugging.
  *
  * @param FunctionName
  *  Name of the function.

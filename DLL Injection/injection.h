@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #define DLL L"dll\\crow.dll"
+<<<<<<< HEAD
 #define OKAY(MSG, ...) printf("[+] "          MSG "\n", ##__VA_ARGS__)
 #define INFO(MSG, ...) printf("[*] "          MSG "\n", ##__VA_ARGS__)
 #define WARN(MSG, ...) fprintf(stderr, "[-] " MSG "\n", ##__VA_ARGS__)
@@ -12,6 +13,27 @@
                 "[!] [" FUNCTION_NAME "] failed, error: 0x%lx\n"     \
                 "[*] %s:%d\n", GetLastError(), __FILE__, __LINE__);  \
     } while (0)
+=======
+#define OKAY(MSG, ...) printf("[+] " MSG "\n", ##__VA_ARGS__)
+#define INFO(MSG, ...) printf("[*] " MSG "\n", ##__VA_ARGS__)
+#define WARN(MSG, ...) printf("[-] " MSG "\n", ##__VA_ARGS__)
+
+/*!
+ * @brief
+ *  Prints out a function's error code with the function's name for easier debugging.
+ *  This function is just a wrapper for GetLastError().
+ *
+ * @param FunctionName
+ *  Name of the function.
+ *
+ * @note
+ *  GetLastError() just reads from the _TEB at the LastError member/offset (_TEB->LastError),
+ *  so *any* function/routine that does this can be used in place of GetLastError().
+ *
+ * @return Void.
+ */
+VOID PrettyFormat(_In_ LPCSTR FunctionName);
+>>>>>>> 748e7951bdfd1714958ed2277fcad63fabf13b1e
 
 /*!
  * @brief
@@ -20,7 +42,7 @@
  *  Similar to the standard shellcode injection method, most of the steps
  *  we perform in this method are the same. The only difference is that
  *  we're injecting a library/module/DLL/whatever into a target process. Once a
- *  DLL is loaded in a process, its' DllMain() function is executed automagically.
+ *  DLL is loaded in a process, its DllMain() function is executed automagically.
  *
  *  To do this injection, we get a valid handle on the target process, allocate
  *  some memory into it, write the path to our DLL into that memory region. Then,
