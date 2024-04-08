@@ -1,5 +1,23 @@
 #include "injection.h"
 
+VOID PrintBanner(VOID) {
+    printf(
+        "     _  ___________   ___  ____  ____       _         __  _                                    \n"
+        "    / |/ /_  __/ _ | / _ \\/  _/ /  _/__    (_)__ ____/ /_(_)__  ___                           \n"
+        "   /    / / / / __ |/ ___// /  _/ // _ \\  / / -_) __/ __/ / _ \\/ _ \\                        \n"
+        "  /_/|_/ /_/ /_/ |_/_/  /___/ /___/_//_/_/ /\\__/\\__/\\__/_/\\___/_//_/                       \n"
+        "                                    |___/                                                    \n\n"
+        "  /*!                                                                                          \n"
+        "   * made with love and a bit of malice <3                                                     \n"
+        "   * -> https://www.crow.rip, @cr-0w, crow@crow.rip                                            \n"
+        "   *                                                                                           \n"
+        "   * disclaimer: I am not the author of this technique, this is just *my* implementation of it.\n"
+        "   * warning: I am not responsible for what you do with this program. use this responsibly!    \n"
+        "   * enjoy, nerds. lots o' luv.                                                                \n"
+        "   */                                                                                        \n\n"
+    );
+}
+
 UINT_PTR GetNtFunctionAddress(
     _In_ LPCSTR FunctionName,
     _In_ CONST HMODULE ModuleHandle

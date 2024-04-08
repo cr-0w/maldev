@@ -179,3 +179,13 @@ BOOL NTAPIInjection(
     _In_ CONST PBYTE Payload,
     _In_ CONST SIZE_T PayloadSize
 );
+
+/*!
+ * @brief
+ * Prints the technique banner.
+ * 
+ * @param Void.
+ * 
+ * @return Void.
+ */
+VOID PrintBanner(VOID);
