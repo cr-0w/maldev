@@ -53,3 +53,13 @@ BOOL DLLInjection(
     _In_ CONST DWORD PID,
     _In_ CONST SIZE_T PathSize
 );
+
+/*!
+ * @brief
+ * Prints the technique banner.
+ * 
+ * @param Void.
+ * 
+ * @return Void.
+ */
+VOID PrintBanner(VOID);

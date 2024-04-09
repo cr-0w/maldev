@@ -11,6 +11,8 @@
 
 int main(int argc, char* argv[]) {
 
+    PrintBanner();
+
     if (argc < 2) {
         WARN("usage: \"%s\" [PID]", argv[0]);
         return EXIT_FAILURE;

@@ -1,5 +1,23 @@
 #include "injection.h"
 
+VOID PrintBanner(VOID) {
+    printf(
+        "     ___  __   __     ____       _         __  _                                               \n"
+        "    / _ \\/ /  / /    /  _/__    (_)__ ____/ /_(_)__  ___                                      \n"
+        "   / // / /__/ /__  _/ // _ \\  / / -_) __/ __/ / _ \\/ _ \\                                   \n"
+        "  /____/____/____/ /___/_//_/_/ /\\__/\\__/\\__/_/\\___/_//_/                                  \n"
+        "                           |___/                                                             \n\n"
+        "  /*!                                                                                          \n"
+        "   * made with love and a bit of malice <3                                                     \n"
+        "   * -> https://www.crow.rip, @cr-0w, crow@crow.rip                                            \n"
+        "   *                                                                                           \n"
+        "   * disclaimer: I am not the author of this technique, this is just *my* implementation of it.\n"
+        "   * warning: I am not responsible for what you do with this program. use this responsibly!    \n"
+        "   * enjoy, nerds. lots o' luv.                                                                \n"
+        "   */                                                                                        \n\n"
+    );
+}
+
 BOOL DLLInjection(
     _In_ LPCWSTR DllPath,
     _In_ CONST DWORD PID,
