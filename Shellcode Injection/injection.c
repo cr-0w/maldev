@@ -82,7 +82,7 @@ CLEANUP:
 
     if (Buffer) {
         VirtualFree(Buffer, 0, MEM_RELEASE);
-        INFO("[0x%p] remote buffer freed", Buffer);
+        INFO("[0x%p] allocated buffer freed", Buffer);
     }
 
     return State;
