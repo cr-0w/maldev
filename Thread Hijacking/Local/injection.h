@@ -12,12 +12,11 @@
                 __FILE__, __LINE__, GetLastError());                      \
     } while (0)
 
-
 /*!
  * @brief
- *  Gets the context of a thread that's in a suspended state, updates its instruction 
+ *  Gets the context of a thread that's in a suspended state, updates its instruction
  *  pointer to point to a payload buffer.
- *  
+ *
  * @param ThreadHandle.
  *  A valid handle to a thread that's in a suspended state.
  *
@@ -31,32 +30,32 @@
  *  True if successful, false if not.
  */
 BOOL LocalThreadHijack(
-        _In_ HANDLE ThreadHandle,
-        _In_ PVOID Buffer,
-        _In_ PBYTE Payload,
-        _In_ SIZE_T PayloadSize 
+	_In_ HANDLE ThreadHandle,
+	_In_ PVOID Buffer,
+	_In_ PBYTE Payload,
+	_In_ SIZE_T PayloadSize
 );
 
 /*!
  * @brief
  *  A dummy function to motivate the creation of a suspended thread.
  *
- * @param Void.
+ * @param Void
  *
- * @note 
+ * @note
  *  This function can literally be whatever you want. Typically, you might like to
  *  use benign functions that don't do anything or are harmless.
  *
- * @return Void.
+ * @return Void
  */
 VOID DummyFunction(VOID);
 
 /*!
  * @brief
  * Prints the technique banner.
- * 
- * @param Void.
- * 
- * @return Void.
+ *
+ * @param Void
+ *
+ * @return Void
  */
 VOID PrintBanner(VOID);
