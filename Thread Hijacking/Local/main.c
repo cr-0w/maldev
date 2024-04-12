@@ -1,10 +1,9 @@
 /*
-------------------------------------------------------
+-----------------------------------------------------------------------------
 @culprit: crow
 @website: https://www.crow.rip (blog post coming soon)
-@credits: in future blog post @ #references
-@youtube: https://youtube.com/@crr0ww
-------------------------------------------------------
+@credits: https://maldevacademy.com, more @ #references in upcoming blog post
+-----------------------------------------------------------------------------
 */
 
 #include "injection.h"
