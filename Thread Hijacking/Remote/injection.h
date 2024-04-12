@@ -12,14 +12,13 @@
                 __FILE__, __LINE__, GetLastError());                      \
     } while (0)
 
-
 /*!
  * @brief
  *  Creates a process in a suspended state.
- * 
+ *
  * @param ProcessName
  *  The name of the process you wish to start. This should be something present in %WINDIR%\System32\*.
- * 
+ *
  * @param ProcessId
  *  The PID of the suspended process.
  *
@@ -34,7 +33,7 @@
  *
  */
 BOOL CreateSuspendedProcess(
-    _In_  LPCSTR ProcessName,
+	_In_  LPCSTR ProcessName,
 	_Out_ PDWORD ProcessId,
 	_Out_ PHANDLE ProcessHandle,
 	_Out_ PHANDLE ThreadHandle
@@ -42,9 +41,9 @@ BOOL CreateSuspendedProcess(
 
 /*!
  * @brief
- *  Gets the context of a thread that's in a suspended state, updates its instruction 
+ *  Gets the context of a thread that's in a suspended state, updates its instruction
  *  pointer to point to a payload buffer.
- *  
+ *
  * @param ThreadHandle
  *  A valid handle to a thread that's in a suspended state.
  *
@@ -60,19 +59,19 @@ BOOL CreateSuspendedProcess(
  *  True if successful, false if not.
  */
 BOOL RemoteThreadHijack(
-        _In_ HANDLE ThreadHandle,
-        _In_ HANDLE ProcessHandle,
-        _In_ PVOID Buffer,
-        _In_ PBYTE Payload,
-        _In_ SIZE_T PayloadSize 
+	_In_ HANDLE ThreadHandle,
+	_In_ HANDLE ProcessHandle,
+	_In_ PVOID Buffer,
+	_In_ PBYTE Payload,
+	_In_ SIZE_T PayloadSize
 );
 
 /*!
  * @brief
  * Prints the technique banner.
- * 
- * @param Void.
- * 
- * @return Void.
+ *
+ * @param Void
+ *
+ * @return Void
  */
 VOID PrintBanner(VOID);
