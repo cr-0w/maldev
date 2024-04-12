@@ -17,16 +17,16 @@
  *  Gets the context of a thread that's in a suspended state, updates its instruction
  *  pointer to point to a payload buffer.
  *
- * @param ThreadHandle.
+ * @param ThreadHandle
  *  A valid handle to a thread that's in a suspended state.
  *
- * @param Buffer.
+ * @param Buffer
  *  A pointer to the allocated buffer where your payload will be going into.
  *
  * @param PayloadSize
  *  The size of the payload.
  *
- * @return Bool.
+ * @return Bool
  *  True if successful, false if not.
  */
 BOOL LocalThreadHijack(

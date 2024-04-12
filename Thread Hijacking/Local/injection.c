@@ -65,6 +65,7 @@ BOOL LocalThreadHijack(
 	);
 
 	INFO("| RIP -> [0x%p] updating the thread's context to make RIP point to our allocated buffer...", (PVOID*)CTX.Rip);
+
 	CTX.Rip = (DWORD64)Buffer;
 
 	if (!SetThreadContext(ThreadHandle, &CTX)) {
