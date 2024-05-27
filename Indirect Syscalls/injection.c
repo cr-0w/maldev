@@ -35,7 +35,11 @@ VOID IndirectPrelude(
         return;
     }
 
-    *NtFunctionSSN = ((PBYTE)(NtFunctionAddress + 0x4))[0];
+    // Read the 4th and 5th bytes, as the system call numbers occupy 2 bytes
+    BYTE byte4 = ((PBYTE)NtFunctionAddress)[4];
+    BYTE byte5 = ((PBYTE)NtFunctionAddress)[5];
+    *NtFunctionSSN = (byte5 << 8) | byte4; // Combine to a single DWORD
+
     *NtFunctionSyscall = NtFunctionAddress + 0x12;
 
     /* making memcmp happy */

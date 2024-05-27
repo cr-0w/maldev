@@ -32,7 +32,11 @@ VOID GetSyscallNumber(
         return;
     }
 
-    *NtFunctionSSN = ((PBYTE)(NtFunctionAddress + 0x4))[0];
+    // Read the 4th and 5th bytes, as the system call numbers occupy 2 bytes
+    BYTE byte4 = ((PBYTE)NtFunctionAddress)[4];
+    BYTE byte5 = ((PBYTE)NtFunctionAddress)[5];
+    *NtFunctionSSN = (byte5 << 8) | byte4; // Combine to a single DWORD
+    
     INFO("[0x%p] [0x%0.3lx] -> %s", (PVOID)NtFunctionAddress, *NtFunctionSSN, NtFunctionName);
     return;
 
